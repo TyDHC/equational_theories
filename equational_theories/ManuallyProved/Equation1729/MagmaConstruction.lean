@@ -122,16 +122,23 @@ lemma PartialSolution.inv_L₀' {sol : PartialSolution} {x : N} (h: x ∈ sol.Do
 noncomputable abbrev Set.choose {α: Type} {S: Set α} {P: α → Prop} (h: ∃ s ∈ S, P s) : S := ⟨_, (Classical.choose_spec h).1⟩
 
 -- for Mathlib?
-lemma Set.choose_spec {α: Type} {S: Set α} {P: α → Prop} (h: ∃ s ∈ S, P s) : P (Set.choose h) := (Classical.choose_spec h).2
+lemma Set.choose_spec {α: Type} {S: Set α} {P: α → Prop}
+    (h: ∃ s ∈ S, P s) : P (Set.choose h) :=
+  (Classical.choose_spec h).2
 
 -- for Mathlib?
-lemma IsChain.IsDirected {α: Type} [Preorder α] {s: Set α} (h: IsChain (fun x y ↦ x ≤ y) s) [Nonempty s] : IsDirected s (fun x y ↦ x ≤ y) := by
+lemma IsChain.IsDirected {α: Type} [Preorder α] {s: Set α} (h: IsChain (fun x y ↦ x ≤ y) s) [Nonempty s]
+    : IsDirected s (fun x y ↦ x ≤ y) := by
   rw [← directedOn_univ_iff]
   convert (directedOn_image (s := Set.univ) (f := Subtype.val) (r := fun x y ↦ x ≤ y)).mp _
   convert IsChain.directedOn h
   exact Subtype.coe_image_univ s
 
-lemma use_chain {sols : Set PartialSolution} (hchain: IsChain (fun (sol1 sol2 : PartialSolution) => sol1 ≤ sol2) sols ) (hnon: Nonempty sols) (htotal_L₀' : ∀ x : N, ∃ sol ∈ sols, x ∈ sol.Dom_L₀') (htotal_S' : ∀ x : N, ∃ sol ∈ sols, x ∈ sol.Dom_S') (htotal_op : ∀ (x y : N), ∃ sol ∈ sols, (x,y) ∈ sol.Dom_op) : ∃ (G: Type) (_: Magma G), Equation1729 G ∧ ¬ Equation817 G := by
+lemma use_chain {sols : Set PartialSolution}
+    (hchain: IsChain (fun (sol1 sol2 : PartialSolution) => sol1 ≤ sol2) sols ) (hnon: Nonempty sols)
+    (htotal_L₀' : ∀ x : N, ∃ sol ∈ sols, x ∈ sol.Dom_L₀') (htotal_S' : ∀ x : N, ∃ sol ∈ sols, x ∈ sol.Dom_S')
+    (htotal_op : ∀ (x y : N), ∃ sol ∈ sols, (x,y) ∈ sol.Dom_op)
+    : ∃ (G: Type) (_: Magma G), Equation1729 G ∧ ¬ Equation817 G := by
   let f := Filter.atTop (α := sols)
   have fnon : f.NeBot := Filter.atTop_neBot_iff.mpr ⟨hnon, IsChain.IsDirected hchain⟩
   let S' (x : N) := (Set.choose (htotal_S' x)).1.S' x
@@ -204,7 +211,17 @@ lemma use_chain {sols : Set PartialSolution} (hchain: IsChain (fun (sol1 sol2 : 
   aesop
 
 /-- All the elements of `SM` that are involved in a partial solution, plus an additional set of extra elements of `N`-/
-abbrev PartialSolution.involved_elements (sol: PartialSolution) (extras: Finset M) : Finset SM := Finset.biUnion sol.Predom_L₀' basis_elements ∪ Finset.biUnion sol.Dom_S' basis_elements ∪ Finset.image  sol.S' sol.Dom_S' ∪ Finset.biUnion sol.Dom_op (fun (x, _) ↦ basis_elements x) ∪ Finset.biUnion sol.Dom_op (fun (_, y) ↦ basis_elements y) ∪ Finset.biUnion sol.Dom_op (fun (x, y) ↦ basis_elements' (sol.op x y)) ∪ Finset.biUnion sol.I (fun (x, _, _) ↦ basis_elements x) ∪ Finset.biUnion sol.I (fun (_, y, _) ↦ basis_elements y) ∪ Finset.biUnion sol.I (fun (_, _, z) ↦ basis_elements z) ∪ Finset.biUnion extras basis_elements'
+abbrev PartialSolution.involved_elements (sol: PartialSolution) (extras: Finset M) : Finset SM :=
+  Finset.biUnion sol.Predom_L₀' basis_elements
+  ∪ Finset.biUnion sol.Dom_S' basis_elements
+  ∪ Finset.image  sol.S' sol.Dom_S'
+  ∪ Finset.biUnion sol.Dom_op (fun (x, _) ↦ basis_elements x)
+  ∪ Finset.biUnion sol.Dom_op (fun (_, y) ↦ basis_elements y)
+  ∪ Finset.biUnion sol.Dom_op (fun (x, y) ↦ basis_elements' (sol.op x y))
+  ∪ Finset.biUnion sol.I (fun (x, _, _) ↦ basis_elements x)
+  ∪ Finset.biUnion sol.I (fun (_, y, _) ↦ basis_elements y)
+  ∪ Finset.biUnion sol.I (fun (_, _, z) ↦ basis_elements z)
+  ∪ Finset.biUnion extras basis_elements'
 
 abbrev PartialSolution.directly_sees (sol:PartialSolution) (extras: Finset M) (x : N) := basis_elements x ⊆ sol.involved_elements extras
 
@@ -218,10 +235,12 @@ lemma PartialSolution.see_direct (sol:PartialSolution) {extras: Finset M} {x : N
 
 lemma PartialSolution.see_direct' (sol:PartialSolution) {extras: Finset M} {x : M} (h: sol.directly_sees' extras x) : sol.sees' extras x := generators_mono h
 
-lemma PartialSolution.sees_mul (sol: PartialSolution) {extras: Finset M} {x y:N} (hx: sol.sees extras x) (hy: sol.sees extras y) : sol.sees extras (x * y) := calc
-  _ ⊆ generators (basis_elements x ∪ basis_elements y)  := generators_mono <| basis_elements_of_mul x y
-  _ = generators (basis_elements x) ∪ generators (basis_elements y) := generators_union ..
-  _ ⊆ _ := Finset.union_subset hx hy
+lemma PartialSolution.sees_mul (sol: PartialSolution) {extras: Finset M} {x y:N}
+    (hx: sol.sees extras x) (hy: sol.sees extras y) : sol.sees extras (x * y) :=
+  calc
+    _ ⊆ generators (basis_elements x ∪ basis_elements y)  := generators_mono <| basis_elements_of_mul x y
+    _ = generators (basis_elements x) ∪ generators (basis_elements y) := generators_union ..
+    _ ⊆ _ := Finset.union_subset hx hy
 
 lemma PartialSolution.sees_inv (sol: PartialSolution) {extras: Finset M} {x : N} (hx: sol.sees extras x)  : sol.sees extras x⁻¹ := by
   dsimp [PartialSolution.sees]
@@ -229,7 +248,8 @@ lemma PartialSolution.sees_inv (sol: PartialSolution) {extras: Finset M} {x : N}
   exact basis_elements_of_inv x
 
 
-abbrev PartialSolution.reaches (sol: PartialSolution) (extras: Finset M) (a : SM) := in_generators (sol.involved_elements extras) a
+abbrev PartialSolution.reaches (sol: PartialSolution) (extras: Finset M) (a : SM) :=
+  in_generators (sol.involved_elements extras) a
 
 lemma PartialSolution.sees_iff (sol:PartialSolution) (extras: Finset M) (x : N) : sol.sees extras x ↔ ∀ a ∈ basis_elements x, sol.reaches extras a := generators_subset_iff
 
