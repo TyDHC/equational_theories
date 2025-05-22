@@ -372,7 +372,9 @@ lemma PartialSolution.fresh_invis_pow (sol : PartialSolution) (extras: Finset M)
 open Classical in
 /-- Extend a map L₀' to map (R' 0)^n x to (R' 0)^n y and (R' 0)^n y to (R' 0)^(n-1) x for all integers n·  One should also add x and y to the predomain when extending· -/
 noncomputable abbrev PartialSolution.extend {sol:PartialSolution} (x y:N) (z : N): N :=
-  if z ≈ x then z * x⁻¹ * y else (if z ≈ y then z * y⁻¹ * (e 0)⁻¹ * x else sol.L₀' z)
+  if z ≈ x
+    then z * x⁻¹ * y
+    else (if z ≈ y then z * y⁻¹ * (e 0)⁻¹ * x else sol.L₀' z)
 
 lemma PartialSolution.extend_not_rel {sol:PartialSolution} {x y:N} {z : N} (hx: ¬ z ≈ x) (hy: ¬ z ≈ y) : sol.extend x y z = sol.L₀' z := by
   simp only [extend, hx, hy, if_false, if_false]
@@ -720,7 +722,8 @@ lemma PartialSolution_with_axioms.d₀_neq_d₁ (sol: PartialSolution_with_axiom
   by_contra! this
   exact zero_ne_one <| fresh_injective _ <| E_inj this
 
-lemma PartialSolution_with_axioms.d_injective (sol: PartialSolution_with_axioms) {y z y' z': N} (h: sol.d y z = sol.d y' z') : y = y' ∧ z = z' :=  (Prod.mk.injEq _ _ _ _) ▸ (enum_injective <| fresh_injective _ <| E_inj h)
+lemma PartialSolution_with_axioms.d_injective (sol: PartialSolution_with_axioms) {y z y' z': N} (h: sol.d y z = sol.d y' z') : y = y' ∧ z = z' :=
+  (Prod.mk.injEq _ _ _ _) ▸ (enum_injective <| fresh_injective _ <| E_inj h)
 
 lemma PartialSolution_with_axioms.test (sol: PartialSolution_with_axioms) {a b : SM} (i:ℕ) (h: a (sol.m i) ≠ b (sol.m i)) : a ≠ b :=
   fun x ↦ h (congrFun (congrArg DFunLike.coe x) (sol.m i))
@@ -732,6 +735,7 @@ lemma PartialSolution_with_axioms.Sd₀_neq_d₀ (sol: PartialSolution_with_axio
 
 lemma PartialSolution_with_axioms.Sd₀_neq_d₁  (sol: PartialSolution_with_axioms) : S sol.d₀ ≠ sol.d₁ := by
   apply sol.test 1
+
   simp only [S_eval, E_apply, add_right_inj]
   decide
 
@@ -1026,7 +1030,9 @@ lemma PartialSolution_with_axioms.neq_one_if_shift_to {sol:PartialSolution_with_
   simp only [ha, y₀]
   exact R'_axiom_iib _ _
 
-lemma PartialSolution_with_axioms.L₀'_no_collide_2 {sol: PartialSolution_with_axioms} {data data' : L₀'_data sol} (hneq: data ≠ data') : ¬ (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').1 ∧ ¬ (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').2 := by
+lemma PartialSolution_with_axioms.L₀'_no_collide_2 {sol: PartialSolution_with_axioms} {data data' : L₀'_data sol}
+    (hneq: data ≠ data') :
+    ¬ (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').1 ∧ ¬ (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').2 := by
   rcases data with ⟨⟩ | ⟨⟩ | ⟨a,ha⟩ | ⟨a,ha⟩ | ⟨y,z,hz⟩
   all_goals rcases data' with ⟨⟩ | ⟨⟩ | ⟨a',ha'⟩ | ⟨a',ha'⟩ | ⟨y',z',hz'⟩
   all_goals try simp at hneq
@@ -1155,7 +1161,8 @@ lemma PartialSolution_with_axioms.L₀'_no_collide_2 {sol: PartialSolution_with_
     exact sol.d_injective h.symm
   simp [h]
 
-lemma PartialSolution_with_axioms.L₀'_no_collide_3 (sol: PartialSolution_with_axioms) (data data' : L₀'_data sol) : ¬ (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').2 := by
+lemma PartialSolution_with_axioms.L₀'_no_collide_3 (sol: PartialSolution_with_axioms) (data data' : L₀'_data sol) :
+    ¬ (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').2 := by
   rcases data with ⟨⟩ | ⟨⟩ | ⟨a,ha⟩ | ⟨a,ha⟩ | ⟨y,z,hz⟩
   all_goals rcases data' with ⟨⟩ | ⟨⟩ | ⟨a',ha'⟩ | ⟨a',ha'⟩ | ⟨y',z',hz'⟩
   all_goals simp [PartialSolution_with_axioms.L₀'_pair,R']
@@ -1222,57 +1229,62 @@ lemma zpow_of_e_inj (a : SM) : Function.Injective (fun n:ℤ ↦ (e a)^n) :=
   injective_zpow_iff_not_isOfFinOrder.mpr (FreeGroup.infinite_order _ (FreeGroup.of_ne_one a))
 
 
-noncomputable abbrev PartialSolution_with_axioms.L₀'_embed (sol: PartialSolution_with_axioms) : (L₀'_data sol) × ℤ × Bool ↪ N := {
-    toFun := fun input ↦ match input with
-    | (data, n, true) => (e 0)^n * (sol.L₀'_pair data).1
-    | (data, n, false) => (e 0)^n * (sol.L₀'_pair data).2
-    inj' := by
-      intro (data,n,b) (data',n',b') h
-      by_cases hb:b
-      · by_cases hb':b'
-        · simp [hb, hb'] at h ⊢
-          have : (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').1 := calc
-            _ ≈ (e 0)^n * (sol.L₀'_pair data).1 := rel_of_mul _ n
-            _ ≈ (e 0)^n' * (sol.L₀'_pair data').1 := by rw [h]
-            _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
-          have heq : data = data' := by
-            contrapose! this
-            exact (sol.L₀'_no_collide_2 this).1
-          simp [heq] at h ⊢
-          exact zpow_of_e_inj 0 h
-        simp [hb, hb'] at h ⊢
-        have : (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').2 := calc
-            _ ≈ (e 0)^n * (sol.L₀'_pair data).1 := rel_of_mul _ n
-            _ ≈ (e 0)^n' * (sol.L₀'_pair data').2 := by rw [h]
-            _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
-        exact sol.L₀'_no_collide_3 _ _ this
-      by_cases hb':b'
-      · simp [hb, hb'] at h
-        simp [hb, hb'] at h ⊢
-        have : (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').1 := calc
-            _ ≈ (e 0)^n * (sol.L₀'_pair data).2 := rel_of_mul _ n
-            _ ≈ (e 0)^n' * (sol.L₀'_pair data').1 := by rw [h]
-            _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
-        exact sol.L₀'_no_collide_3 _ _ <| Setoid.symm this
+noncomputable abbrev PartialSolution_with_axioms.L₀'_embed (sol: PartialSolution_with_axioms) :
+    (L₀'_data sol) × ℤ × Bool ↪ N := {
+  toFun := fun input ↦ match input with
+  | (data, n, true) => (e 0)^n * (sol.L₀'_pair data).1
+  | (data, n, false) => (e 0)^n * (sol.L₀'_pair data).2
+  inj' := by
+    intro (data,n,b) (data',n',b') h
+    by_cases hb:b
+    · by_cases hb':b'
+      · simp [hb, hb'] at h ⊢
+        have : (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').1 := calc
+          _ ≈ (e 0)^n * (sol.L₀'_pair data).1 := rel_of_mul _ n
+          _ ≈ (e 0)^n' * (sol.L₀'_pair data').1 := by rw [h]
+          _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
+        have heq : data = data' := by
+          contrapose! this
+          exact (sol.L₀'_no_collide_2 this).1
+        simp [heq] at h ⊢
+        exact zpow_of_e_inj 0 h
       simp [hb, hb'] at h ⊢
-      have : (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').2 := calc
-        _ ≈ (e 0)^n * (sol.L₀'_pair data).2 := rel_of_mul _ n
-        _ ≈ (e 0)^n' * (sol.L₀'_pair data').2 := by rw [h]
-        _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
-      have heq : data = data' := by
-        contrapose! this
-        exact (sol.L₀'_no_collide_2 this).2
-      simp [heq] at h ⊢
-      exact zpow_of_e_inj 0 h
+      have : (sol.L₀'_pair data).1 ≈ (sol.L₀'_pair data').2 := calc
+          _ ≈ (e 0)^n * (sol.L₀'_pair data).1 := rel_of_mul _ n
+          _ ≈ (e 0)^n' * (sol.L₀'_pair data').2 := by rw [h]
+          _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
+      exact sol.L₀'_no_collide_3 _ _ this
+    by_cases hb':b'
+    · simp [hb, hb'] at h
+      simp [hb, hb'] at h ⊢
+      have : (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').1 := calc
+          _ ≈ (e 0)^n * (sol.L₀'_pair data).2 := rel_of_mul _ n
+          _ ≈ (e 0)^n' * (sol.L₀'_pair data').1 := by rw [h]
+          _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
+      exact sol.L₀'_no_collide_3 _ _ <| Setoid.symm this
+    simp [hb, hb'] at h ⊢
+    have : (sol.L₀'_pair data).2 ≈ (sol.L₀'_pair data').2 := calc
+      _ ≈ (e 0)^n * (sol.L₀'_pair data).2 := rel_of_mul _ n
+      _ ≈ (e 0)^n' * (sol.L₀'_pair data').2 := by rw [h]
+      _ ≈ _ := Setoid.symm <| rel_of_mul _ n'
+    have heq : data = data' := by
+      contrapose! this
+      exact (sol.L₀'_no_collide_2 this).2
+    simp [heq] at h ⊢
+    exact zpow_of_e_inj 0 h
   }
 
-noncomputable abbrev PartialSolution_with_axioms.L₀'_pre_embed_base (sol: PartialSolution_with_axioms) (input: L₀'_data sol × Bool) : N := match input with
+noncomputable abbrev PartialSolution_with_axioms.L₀'_pre_embed_base (sol: PartialSolution_with_axioms)
+    (input: L₀'_data sol × Bool) : N :=
+  match input with
     | (data, true) => (sol.L₀'_pair data).1
     | (data, false) => (sol.L₀'_pair data).2
 
-lemma PartialSolution_with_axioms.L₀'_pre_embed_base_eq (sol: PartialSolution_with_axioms) (data: L₀'_data sol) (b: Bool) : sol.L₀'_pre_embed_base (data, b) = sol.L₀'_embed (data,0,b) := match b with
-  | true => by simp
-  | false => by simp
+lemma PartialSolution_with_axioms.L₀'_pre_embed_base_eq (sol: PartialSolution_with_axioms)
+    (data: L₀'_data sol) (b: Bool) : sol.L₀'_pre_embed_base (data, b) = sol.L₀'_embed (data,0,b) :=
+  match b with
+    | true => by simp
+    | false => by simp
 
 noncomputable abbrev PartialSolution_with_axioms.L₀'_pre_embed (sol: PartialSolution_with_axioms) : L₀'_data sol × Bool ↪ N := {
     toFun := sol.L₀'_pre_embed_base
@@ -1326,11 +1338,12 @@ lemma PartialSolution_with_axioms.mem_new_predom' (sol : PartialSolution_with_ax
     exact sol.L₀'_pre_embed.attains_image (data, false)
 
 /- Construction of the new `op`·  Each op_data object `data` produces an instance of the operation `op`: `sol.op (op_triple d₀ d data).1 (op_triple d₀ d data).2.1 = (op_triple d₀ d data).2.2· -/
-noncomputable abbrev PartialSolution_with_axioms.op_triple (sol : PartialSolution_with_axioms) : op_data sol → N × N × M := fun data ↦ match data with
-  | op_data.old y z _hop => (y, z, sol.op y z)
-  | op_data.v => (sol.x, sol.x, Sum.inl sol.d₀)
-  | op_data.P₁ y z _hI => (z, sol.x, Sum.inr <| (R' (S sol.d₀)).symm <| e <| sol.d y z)
-  | op_data.P₂ y z _hI _hz => ((R' (S sol.d₀)).symm <| e <| sol.d y z, z, Sum.inr <| (R' (S (sol.S' z))).symm <| sol.L₀' <| R' 0 <| R' (sol.S' z) x)
+noncomputable abbrev PartialSolution_with_axioms.op_triple (sol : PartialSolution_with_axioms) : op_data sol → N × N × M :=
+  fun data ↦ match data with
+    | op_data.old y z _hop => (y, z, sol.op y z)
+    | op_data.v => (sol.x, sol.x, Sum.inl sol.d₀)
+    | op_data.P₁ y z _hI => (z, sol.x, Sum.inr <| (R' (S sol.d₀)).symm <| e <| sol.d y z)
+    | op_data.P₂ y z _hI _hz => ((R' (S sol.d₀)).symm <| e <| sol.d y z, z, Sum.inr <| (R' (S (sol.S' z))).symm <| sol.L₀' <| R' 0 <| R' (sol.S' z) x)
 
 noncomputable abbrev PartialSolution_with_axioms.op_embed (sol : PartialSolution_with_axioms) : op_data sol ↪ N × N := {
     toFun := fun data ↦ ((sol.op_triple data).1, (sol.op_triple data).2.1)
